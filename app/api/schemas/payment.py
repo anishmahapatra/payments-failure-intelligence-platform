@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -52,23 +51,10 @@ class PaymentScoreRequest(BaseModel):
 class PaymentScoreResponse(BaseModel):
     payment_id: str
     risk_score: float
-    likely_failure_class: FailureClass
+    predicted_failure_class: FailureClass
     recommended_action: RecommendedAction
     model_version: str
     reasons: list[str]
-
-
-class BatchPaymentRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    idempotency_key: str = Field(min_length=8, max_length=128)
-    payments: list[PaymentScoreRequest] = Field(min_length=1, max_length=500)
-
-
-class BatchJobResponse(BaseModel):
-    job_id: str
-    status: str
-    submitted_at: datetime
 
 
 class BatchJobSummary(BaseModel):
@@ -77,14 +63,3 @@ class BatchJobSummary(BaseModel):
     average_risk_score: float
     failure_class_distribution: dict[str, int]
     recommended_action_distribution: dict[str, int]
-
-
-class JobStatusResponse(BaseModel):
-    job_id: str
-    status: str
-    submitted_at: datetime
-    updated_at: datetime
-    attempts: int
-    summary: BatchJobSummary | None = None
-    error_message: str | None = None
-

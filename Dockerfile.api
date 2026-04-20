@@ -5,12 +5,14 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-COPY pyproject.toml README.md ./
+RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+
+COPY pyproject.toml README.md requirements.txt ./
 COPY app ./app
+COPY scripts ./scripts
 COPY training ./training
 COPY feature_repo ./feature_repo
 
 RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir .
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-
+CMD ["sh", "-c", "./scripts/wait_for_postgres.sh postgres 5432 && python scripts/init_db.py && uvicorn app.main:app --host 0.0.0.0 --port 8000"]

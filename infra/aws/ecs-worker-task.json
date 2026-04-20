@@ -9,12 +9,14 @@
       "name": "worker",
       "image": "<account>.dkr.ecr.<region>.amazonaws.com/payments-failure-intelligence-worker:latest",
       "essential": true,
-      "command": ["python", "-m", "app.workers.runner"],
+      "command": ["sh", "-c", "python scripts/init_db.py && python -m app.workers.runner"],
       "environment": [
         { "name": "APP_ENV", "value": "production" },
         { "name": "DATABASE_URL", "value": "<rds-connection-string>" },
         { "name": "REDIS_URL", "value": "<elasticache-redis-url>" },
-        { "name": "MLFLOW_TRACKING_URI", "value": "<mlflow-url>" }
+        { "name": "REDIS_QUEUE_NAME", "value": "payment-batch-jobs" },
+        { "name": "MLFLOW_TRACKING_URI", "value": "<optional-mlflow-url>" },
+        { "name": "MODEL_ARTIFACT_PATH", "value": "/app/artifacts/model_bundle.joblib" }
       ],
       "logConfiguration": {
         "logDriver": "awslogs",
@@ -27,4 +29,3 @@
     }
   ]
 }
-

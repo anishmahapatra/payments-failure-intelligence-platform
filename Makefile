@@ -1,4 +1,4 @@
-.PHONY: venv install up down test lint train seed-data api worker
+.PHONY: venv install up down test lint train init-db seed-data api worker
 
 VENV ?= .venv
 PYTHON := $(VENV)/bin/python
@@ -24,10 +24,13 @@ lint:
 	$(VENV)/bin/ruff check .
 
 seed-data:
-	$(PYTHON) -m training.scripts.generate_synthetic_data
+	$(PYTHON) scripts/seed_local_data.py
 
 train:
 	$(PYTHON) -m training.scripts.train_model
+
+init-db:
+	$(PYTHON) scripts/init_db.py
 
 api:
 	$(VENV)/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload

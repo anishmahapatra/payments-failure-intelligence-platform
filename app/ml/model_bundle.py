@@ -62,4 +62,3 @@ def build_reason_hints(features: dict[str, Any], top_feature_names: list[str]) -
     if not hints:
         hints = [f"Top model features: {', '.join(top_feature_names[:3])}"]
     return hints
-

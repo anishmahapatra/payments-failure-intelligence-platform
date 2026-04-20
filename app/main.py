@@ -5,9 +5,11 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from app.api.routes.health import router as health_router
+from app.api.routes.jobs import router as jobs_router
 from app.api.routes.payments import router as payments_router
-from app.api.routes.system import router as system_router
 from app.core.config import get_settings
+from app.core.exceptions import AppError
 from app.core.logging import configure_logging, get_logger
 from app.core.metrics import ERROR_COUNTER, REQUEST_COUNTER, REQUEST_LATENCY
 from app.db.session import initialize_database
@@ -31,7 +33,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 app.include_router(payments_router)
-app.include_router(system_router)
+app.include_router(jobs_router)
+app.include_router(health_router)
 
 
 @app.middleware("http")
@@ -63,6 +66,21 @@ async def request_validation_handler(_: Request, exc: RequestValidationError) ->
                 "code": "validation_error",
                 "message": "Request validation failed",
                 "details": exc.errors(),
+            }
+        },
+    )
+
+
+@app.exception_handler(AppError)
+async def app_error_handler(_: Request, exc: AppError) -> JSONResponse:
+    ERROR_COUNTER.labels(path="application", method="request", error_type=exc.code).inc()
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": {
+                "code": exc.code,
+                "message": exc.message,
+                "details": [exc.message],
             }
         },
     )

@@ -1,8 +1,6 @@
-from pathlib import Path
 from typing import Any
 
 from app.api.schemas.payment import FailureClass
-from app.core.config import get_settings
 from app.ml.model_bundle import ModelPrediction, TrainedModelBundle, build_reason_hints
 
 
@@ -41,18 +39,5 @@ class HeuristicModel:
         )
 
 
-class ModelRegistry:
-    def __init__(self, artifact_path: Path | None = None):
-        settings = get_settings()
-        self.artifact_path = artifact_path or settings.model_artifact
-        self._model: TrainedModelBundle | HeuristicModel | None = None
-
-    def load(self) -> TrainedModelBundle | HeuristicModel:
-        if self._model is not None:
-            return self._model
-        if self.artifact_path.exists():
-            self._model = TrainedModelBundle.load(self.artifact_path)
-        else:
-            self._model = HeuristicModel()
-        return self._model
-
+def load_model_bundle(path) -> TrainedModelBundle:
+    return TrainedModelBundle.load(path)

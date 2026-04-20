@@ -27,9 +27,17 @@
           "expr": "payment_batch_queue_depth"
         }
       ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Worker Batch Outcomes",
+      "targets": [
+        {
+          "expr": "sum(rate(payment_worker_batch_jobs_total[5m])) by (outcome)"
+        }
+      ]
     }
   ],
   "schemaVersion": 39,
   "version": 1
 }
-

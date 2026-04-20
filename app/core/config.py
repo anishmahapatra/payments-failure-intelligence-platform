@@ -3,6 +3,8 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.core.constants import DEFAULT_REDIS_QUEUE_NAME
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
@@ -13,7 +15,7 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     database_url: str = "postgresql+psycopg://payment_user:payment_pass@localhost:5432/payment_intelligence"
     redis_url: str = "redis://localhost:6379/0"
-    redis_queue_name: str = "payment-batch-jobs"
+    redis_queue_name: str = DEFAULT_REDIS_QUEUE_NAME
     mlflow_tracking_uri: str = "http://localhost:5000"
     mlflow_model_name: str = "payment-failure-intelligence"
     model_artifact_path: str = "training/artifacts/model_bundle.joblib"
@@ -32,4 +34,3 @@ class Settings(BaseSettings):
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     return Settings()
-

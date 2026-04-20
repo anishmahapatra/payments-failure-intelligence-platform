@@ -1,6 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
+from app.api.schemas.job import BatchJobCreateRequest
 from app.api.schemas.payment import PaymentScoreRequest
 
 
@@ -43,3 +44,7 @@ def test_payment_score_request_rejects_tip_above_amount() -> None:
             prior_terminal_failure_rate=0.08,
         )
 
+
+def test_batch_job_request_requires_at_least_one_payment() -> None:
+    with pytest.raises(ValidationError):
+        BatchJobCreateRequest(idempotency_key="batch-key-001", payments=[])

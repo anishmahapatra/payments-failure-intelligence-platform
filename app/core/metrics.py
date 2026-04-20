@@ -21,9 +21,13 @@ BATCH_JOB_COUNTER = Counter(
     "Count of batch jobs by state",
     ["status"],
 )
+WORKER_BATCH_COUNTER = Counter(
+    "payment_worker_batch_jobs_total",
+    "Count of worker batch processing outcomes",
+    ["outcome"],
+)
 QUEUE_DEPTH_GAUGE = Gauge("payment_batch_queue_depth", "Current Redis queue depth")
 
 
 def metrics_response() -> Response:
     return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
-

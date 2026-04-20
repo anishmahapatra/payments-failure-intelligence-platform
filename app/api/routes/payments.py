@@ -1,18 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.schemas.payment import (
-    BatchJobResponse,
-    BatchPaymentRequest,
-    JobStatusResponse,
-    PaymentScoreRequest,
-    PaymentScoreResponse,
-)
-from app.core.config import get_settings
-from app.core.metrics import BATCH_JOB_COUNTER
-from app.db.models import BatchJob
+from app.api.schemas.job import BatchJobCreateRequest, BatchJobCreateResponse
+from app.api.schemas.payment import PaymentScoreRequest, PaymentScoreResponse
 from app.db.session import get_db_session
-from app.services.job_service import JobService
+from app.services.batch_service import BatchService
 from app.services.payment_scoring import PaymentScoringService
 
 router = APIRouter(tags=["payments"])
@@ -31,34 +23,16 @@ def score_payment(
     return scoring_service.score_single(db=db, request=payload)
 
 
-@router.post("/payments/submit-batch", response_model=BatchJobResponse, status_code=202)
+@router.post("/payments/submit-batch", response_model=BatchJobCreateResponse, status_code=202)
 def submit_batch(
-    payload: BatchPaymentRequest,
+    payload: BatchJobCreateRequest,
     db: Session = Depends(get_db_session),
-) -> BatchJobResponse:
-    job_service = JobService(db)
-    batch_job = job_service.create_job(payload)
-    BATCH_JOB_COUNTER.labels(status="queued").inc()
-    return BatchJobResponse(job_id=batch_job.id, status=batch_job.status.value, submitted_at=batch_job.created_at)
-
-
-@router.get("/jobs/{job_id}", response_model=JobStatusResponse)
-def get_job(job_id: str, db: Session = Depends(get_db_session)) -> JobStatusResponse:
-    job = db.get(BatchJob, job_id)
-    if job is None:
-        raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
-    return JobStatusResponse(
-        job_id=job.id,
-        status=job.status.value,
-        submitted_at=job.created_at,
-        updated_at=job.updated_at,
-        attempts=job.attempts,
-        summary=job.summary,
-        error_message=job.error_message,
-    )
+) -> BatchJobCreateResponse:
+    return BatchService(db).submit_batch(payload)
 
 
 @router.get("/payments/config/model-version", include_in_schema=False)
 def current_model_version() -> dict[str, str]:
-    settings = get_settings()
-    return {"model_version": settings.model_version}
+    from app.services.model_registry import ModelRegistryService
+
+    return {"model_version": ModelRegistryService().get_model_version()}

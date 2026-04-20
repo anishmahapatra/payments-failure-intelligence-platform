@@ -11,7 +11,12 @@ SourceConfiguration:
         APP_PORT: "8000"
         DATABASE_URL: <rds-connection-string>
         REDIS_URL: <elasticache-redis-url>
-        MLFLOW_TRACKING_URI: <mlflow-url>
-        MODEL_ARTIFACT_PATH: /tmp/model_bundle.joblib
+        REDIS_QUEUE_NAME: payment-batch-jobs
+        MLFLOW_TRACKING_URI: <optional-mlflow-url>
+        MODEL_ARTIFACT_PATH: /app/artifacts/model_bundle.joblib
+        MODEL_VERSION: deployed-v1
         USE_FEAST_ONLINE_LOOKUP: "false"
-
+AutoScalingConfigurationArn: <app-runner-auto-scaling-config-arn>
+HealthCheckConfiguration:
+  Path: /health
+  Protocol: HTTP
