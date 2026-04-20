@@ -1,0 +1,17 @@
+ServiceName: payments-failure-intelligence-api
+SourceConfiguration:
+  ImageRepository:
+    ImageIdentifier: <account>.dkr.ecr.<region>.amazonaws.com/payments-failure-intelligence-api:latest
+    ImageRepositoryType: ECR
+    ImageConfiguration:
+      Port: "8000"
+      RuntimeEnvironmentVariables:
+        APP_ENV: production
+        APP_HOST: 0.0.0.0
+        APP_PORT: "8000"
+        DATABASE_URL: <rds-connection-string>
+        REDIS_URL: <elasticache-redis-url>
+        MLFLOW_TRACKING_URI: <mlflow-url>
+        MODEL_ARTIFACT_PATH: /tmp/model_bundle.joblib
+        USE_FEAST_ONLINE_LOOKUP: "false"
+

@@ -1,0 +1,30 @@
+{
+  "family": "payments-failure-intelligence-worker",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "containerDefinitions": [
+    {
+      "name": "worker",
+      "image": "<account>.dkr.ecr.<region>.amazonaws.com/payments-failure-intelligence-worker:latest",
+      "essential": true,
+      "command": ["python", "-m", "app.workers.runner"],
+      "environment": [
+        { "name": "APP_ENV", "value": "production" },
+        { "name": "DATABASE_URL", "value": "<rds-connection-string>" },
+        { "name": "REDIS_URL", "value": "<elasticache-redis-url>" },
+        { "name": "MLFLOW_TRACKING_URI", "value": "<mlflow-url>" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/payments-failure-intelligence/worker",
+          "awslogs-region": "<region>",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
+

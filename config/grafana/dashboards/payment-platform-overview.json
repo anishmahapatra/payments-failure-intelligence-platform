@@ -1,0 +1,35 @@
+{
+  "title": "Payment Failure Intelligence",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "API Request Rate",
+      "targets": [
+        {
+          "expr": "sum(rate(payment_api_requests_total[5m])) by (path)"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "API Error Count",
+      "targets": [
+        {
+          "expr": "sum(rate(payment_api_errors_total[5m])) by (error_type)"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Batch Queue Depth",
+      "targets": [
+        {
+          "expr": "payment_batch_queue_depth"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "version": 1
+}
+
