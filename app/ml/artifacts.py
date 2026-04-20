@@ -20,7 +20,10 @@ class HeuristicModel:
             failure_class: FailureClass = "network_timeout"
         elif features["gateway_code"] in {"DO_NOT_HONOR", "INSUFFICIENT_FUNDS", "GENERIC_DECLINE"}:
             failure_class = "gateway_decline"
-        elif features["terminal_type"] in {"legacy_pos", "self_checkout"} and features["retry_count"] >= 2:
+        elif (
+            features["terminal_type"] in {"legacy_pos", "self_checkout"}
+            and features["retry_count"] >= 2
+        ):
             failure_class = "terminal_issue"
         elif features["amount"] > 250 and features["channel"] in {"online", "mobile_wallet"}:
             failure_class = "fraud_or_risk_hold"

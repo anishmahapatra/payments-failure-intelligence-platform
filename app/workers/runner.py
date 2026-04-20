@@ -3,7 +3,7 @@ import time
 from app.core.config import get_settings
 from app.core.logging import configure_logging, get_logger
 from app.core.metrics import WORKER_BATCH_COUNTER
-from app.db.session import SessionLocal, initialize_database
+from app.db.session import SessionLocal
 from app.services.batch_service import BatchService
 
 settings = get_settings()
@@ -27,7 +27,6 @@ def process_once() -> bool:
 
 
 def main() -> None:
-    initialize_database()
     logger.info("worker_started", extra={"event": "worker_started"})
     while True:
         processed = process_once()

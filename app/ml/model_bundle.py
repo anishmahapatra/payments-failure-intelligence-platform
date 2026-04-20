@@ -45,7 +45,7 @@ class TrainedModelBundle:
         joblib.dump(self, output_path)
 
     @classmethod
-    def load(cls, path: Path) -> "TrainedModelBundle":
+    def load(cls, path: Path) -> TrainedModelBundle:
         return joblib.load(path)
 
 

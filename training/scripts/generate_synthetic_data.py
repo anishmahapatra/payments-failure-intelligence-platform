@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import numpy as np
@@ -41,7 +41,7 @@ def generate_synthetic_payments(num_rows: int = 5000, seed: int = 42) -> pd.Data
             "prior_terminal_failure_rate": rng.uniform(0.01, 0.35, size=num_rows).round(4),
         }
     )
-    base_time = datetime.now(timezone.utc)
+    base_time = datetime.now(UTC)
     frame["event_timestamp"] = [
         base_time - timedelta(minutes=int(value))
         for value in rng.integers(0, 60 * 24, size=num_rows)

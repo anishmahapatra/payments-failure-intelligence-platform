@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from pythonjsonlogger.json import JsonFormatter
+from pythonjsonlogger.jsonlogger import JsonFormatter
 
 
 def configure_logging(level: str) -> None:
@@ -19,4 +19,3 @@ def configure_logging(level: str) -> None:
 
 def get_logger(name: str) -> logging.Logger:
     return logging.getLogger(name)
-

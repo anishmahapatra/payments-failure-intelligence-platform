@@ -21,8 +21,9 @@ class BatchService:
         self.scoring_service = PaymentScoringService()
 
     def submit_batch(self, payload: BatchJobCreateRequest) -> BatchJobCreateResponse:
-        job = self.job_service.create_job(payload)
-        self.storage_service.store_batch_request(job, payload.model_dump())
+        job, created = self.job_service.create_job(payload)
+        if created:
+            self.storage_service.store_batch_request(job, payload.model_dump())
         return BatchJobCreateResponse(
             job_id=job.job_id,
             status=job.status,
@@ -37,7 +38,11 @@ class BatchService:
             submitted_at=job.created_at,
             updated_at=job.updated_at,
             completed_at=job.completed_at,
-            result=BatchJobSummary.model_validate(job.result_payload) if job.result_payload else None,
+            result=(
+                BatchJobSummary.model_validate(job.result_payload)
+                if job.result_payload
+                else None
+            ),
             error_message=job.error_message,
         )
 

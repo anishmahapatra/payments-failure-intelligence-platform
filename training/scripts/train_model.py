@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import mlflow
@@ -127,7 +127,7 @@ def train() -> Path:
 
     mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
     mlflow.set_experiment("payment-failure-intelligence")
-    model_version = f"trained-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
+    model_version = f"trained-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}"
     with mlflow.start_run(run_name=model_version) as run:
         mlflow.log_params(
             {

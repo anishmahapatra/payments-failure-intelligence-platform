@@ -4,7 +4,6 @@ from typing import Any, Protocol
 from app.core.config import get_settings
 from app.core.exceptions import ModelNotReadyError
 from app.ml.artifacts import HeuristicModel, load_model_bundle
-from app.ml.model_bundle import TrainedModelBundle
 
 
 class PredictiveModel(Protocol):

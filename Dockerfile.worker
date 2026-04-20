@@ -15,4 +15,4 @@ COPY feature_repo ./feature_repo
 
 RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir .
 
-CMD ["sh", "-c", "./scripts/wait_for_postgres.sh postgres 5432 && python scripts/init_db.py && python -m app.workers.runner"]
+CMD ["sh", "-c", "./scripts/wait_for_postgres.sh postgres 5432 && python -m app.workers.runner"]

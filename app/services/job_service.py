@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from redis import Redis
 from sqlalchemy.orm import Session
@@ -40,14 +40,14 @@ class JobService:
         if not self.settings.redis_queue_name:
             self.settings.redis_queue_name = DEFAULT_REDIS_QUEUE_NAME
 
-    def create_job(self, payload) -> PaymentBatchJob:
+    def create_job(self, payload) -> tuple[PaymentBatchJob, bool]:
         existing = (
             self.db.query(PaymentBatchJob)
             .filter(PaymentBatchJob.idempotency_key == payload.idempotency_key)
             .one_or_none()
         )
         if existing is not None:
-            return existing
+            return existing, False
 
         job = PaymentBatchJob(
             idempotency_key=payload.idempotency_key,
@@ -60,10 +60,13 @@ class JobService:
         self.redis.rpush(self.settings.redis_queue_name, job.job_id)
         QUEUE_DEPTH_GAUGE.set(self.redis.llen(self.settings.redis_queue_name))
         BATCH_JOB_COUNTER.labels(status=JOB_STATUS_QUEUED).inc()
-        return job
+        return job, True
 
     def get_next_job_id(self) -> str | None:
-        item = self.redis.blpop(self.settings.redis_queue_name, timeout=self.settings.worker_poll_interval_seconds)
+        item = self.redis.blpop(
+            self.settings.redis_queue_name,
+            timeout=self.settings.worker_poll_interval_seconds,
+        )
         QUEUE_DEPTH_GAUGE.set(self.redis.llen(self.settings.redis_queue_name))
         if item is None:
             return None
@@ -84,9 +87,9 @@ class JobService:
         if not can_transition(job.status, new_status):
             raise ValueError(f"Invalid status transition from {job.status} to {new_status}")
         job.status = new_status
-        job.updated_at = datetime.now(timezone.utc)
+        job.updated_at = datetime.now(UTC)
         if new_status == JOB_STATUS_COMPLETED:
-            job.completed_at = datetime.now(timezone.utc)
+            job.completed_at = datetime.now(UTC)
         self.db.add(job)
         self.db.commit()
         self.db.refresh(job)
@@ -117,7 +120,7 @@ class JobService:
     def mark_for_retry(self, job: PaymentBatchJob, error_message: str) -> PaymentBatchJob:
         job.status = JOB_STATUS_QUEUED
         job.error_message = error_message
-        job.updated_at = datetime.now(timezone.utc)
+        job.updated_at = datetime.now(UTC)
         self.db.add(job)
         self.db.commit()
         self.db.refresh(job)

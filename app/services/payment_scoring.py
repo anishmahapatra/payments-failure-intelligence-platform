@@ -25,7 +25,10 @@ class PaymentScoringService:
             payment_id=request.payment_id,
             risk_score=prediction.risk_score,
             predicted_failure_class=prediction.failure_class,
-            recommended_action=map_recommended_action(prediction.risk_score, prediction.failure_class),
+            recommended_action=map_recommended_action(
+                prediction.risk_score,
+                prediction.failure_class,
+            ),
             model_version=prediction.model_version,
             reasons=prediction.reasons,
         )
@@ -44,7 +47,11 @@ class PaymentScoringService:
         )
         return response
 
-    def score_batch(self, db: Session, requests: list[PaymentScoreRequest]) -> tuple[list[PaymentScoreResponse], BatchJobSummary]:
+    def score_batch(
+        self,
+        db: Session,
+        requests: list[PaymentScoreRequest],
+    ) -> tuple[list[PaymentScoreResponse], BatchJobSummary]:
         responses = [self.score_single(db=db, request=request) for request in requests]
         failure_classes = Counter(response.predicted_failure_class for response in responses)
         recommended_actions = Counter(response.recommended_action for response in responses)
